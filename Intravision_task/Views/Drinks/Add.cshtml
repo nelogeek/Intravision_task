@@ -1,0 +1,29 @@
+﻿@model Intravision_task.DTO.DrinkDTO
+
+@{
+    ViewData["Title"] = "Add drink";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Add" method="post">
+    <div class="mb-2">
+        <div class="form-group">
+            <label asp-for="Name" class="control-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Price" class="control-label"></label>
+            <input asp-for="Price" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ImageUrl" class="control-label"></label>
+            <input asp-for="ImageUrl" class="form-control" />
+            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+        </div>
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index" asp-controller="Drinks">Back to admin panel</a>
+    <button type="submit" class="btn btn-primary">Add</button>
+</form>

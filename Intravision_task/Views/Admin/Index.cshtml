@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Admin panel";
+}
+
+<div class="text-center">
+    <h1 class="display-4">@ViewData["Title"]</h1>
+    <br />
+    <div>
+        <a asp-controller="Coins" asp-action="Index" class="btn btn-primary">Edit coins</a>
+        <a asp-controller="Drinks" asp-action="Index" class="btn btn-primary">Edit drinks</a>
+    </div>
+</div>
