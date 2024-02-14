@@ -43,7 +43,6 @@ namespace Intravision_task.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(CoinDTO coinDTO)
         {
-            // Проверяем, существует ли монета с таким же номиналом
             var existingCoin = await _context.Coins.FirstOrDefaultAsync(c => c.Value == coinDTO.Value);
 
             if (existingCoin != null)
@@ -98,7 +97,6 @@ namespace Intravision_task.Controllers
                 return NotFound();
             }
 
-            // Проверяем, существует ли другая монета с таким же номиналом, исключая текущую монету
             var existingCoin = await _context.Coins.FirstOrDefaultAsync(c => c.Value == coinDTO.Value && c.Id != id);
 
             if (existingCoin != null)

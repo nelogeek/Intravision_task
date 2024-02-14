@@ -1,0 +1,20 @@
+[
+  {
+    "Name": "Kumis",
+    "Price": 50,
+    "Quantity": 10,
+    "ImageUrl": "https://main-cdn.sbermegamarket.ru/hlr-system/114/322/908/431/623/7/100028183775b0.jpg"
+  },
+  {
+    "Name": "Kissel",
+    "Price": 45,
+    "Quantity": 8,
+    "ImageUrl": "https://posylka-images.s3.eu-central-1.amazonaws.com/08/04/20/89/08042089_6.jpg"
+  },
+  {
+    "Name": "Chacha",
+    "Price": 40,
+    "Quantity": 12,
+    "ImageUrl": "https://podacha-blud.com/uploads/posts/2022-10/1665864593_68-podacha-blud-com-p-napitok-chacha-krasivie-foto-77.jpg"
+  }
+]

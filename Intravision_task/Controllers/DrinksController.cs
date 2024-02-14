@@ -3,6 +3,7 @@ using Intravision_task.DTO;
 using Intravision_task.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Intravision_task.Controllers
 {
@@ -145,6 +146,49 @@ namespace Intravision_task.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ImportDrinks()
+        {
+            try
+            {
+                var file = Request.Form.Files[0];
+
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest("No file uploaded.");
+                }
+
+                using (var stream = new StreamReader(file.OpenReadStream()))
+                {
+                    var jsonString = await stream.ReadToEndAsync();
+                    var drinks = JsonSerializer.Deserialize<List<DrinkDTO>>(jsonString);
+
+                    foreach (var drink in drinks)
+                    {
+                        var newDrink = new Drink
+                        {
+                            Name = drink.Name,
+                            Price = drink.Price,
+                            Quantity = drink.Quantity,
+                            ImageUrl = drink.ImageUrl
+                        };
+
+                        _context.Drinks.Add(newDrink);
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { message = "Drinks imported successfully." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error importing drinks: {ex.Message}" });
+            }
+        }
+
 
         private bool DrinkExists(int id)
         {

@@ -1,27 +1,275 @@
-﻿@model IEnumerable<Intravision_task.DTO.DrinkDTO>
+﻿@model Intravision_task.DTO.MachineDTO
 
 @{
     ViewData["Title"] = "Vending machine";
 }
 
+<style>
+    .coin-button {
+        border-radius: 50%;
+        width: 90px;
+        height: 90px;
+        margin: 5px;
+        background-color: #efc946;
+        transition: all 0.3s ease-in;
+    }
+
+        .coin-button:hover:not([disabled]) {
+            background-color: #fbe187;
+        }
+
+        .coin-button[disabled] {
+            cursor: not-allowed;
+        }
+
+    img {
+        max-width: 230px;
+    }
+</style>
+
+
 <h1>@ViewData["Title"]</h1>
 
-<div class="row">
-    @foreach (var drink in Model)
-    {
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <img src="@drink.ImageUrl" class="card-img-top mx-auto" alt="Drink image" style="max-height: 140px; width:auto">
-                <div class="card-body">
-                    <h5 class="card-title">@drink.Name</h5>
-                    <p class="card-text">@drink.Price ₽</p>
-                    <form asp-action="Buy" method="post">
-                        <input type="hidden" name="drinkId" value="@drink.Id" />
-                        <input type="number" name="amount" placeholder="Enter amount" class="form-control mb-2" required />
-                        <button type="submit" class="btn btn-primary">Buy</button>
-                    </form>
+<div class="d-flex justify-content-between">
+    <div id="coin-buttons">
+        @foreach (var coin in Model.Coins)
+        {
+            <button class="coin-button fs-3" value="@coin.Value" data-quantity="@coin.Quantity" data-locked="@coin.IsBlocked"
+            @if (coin.Quantity == 0 || coin.IsBlocked)
+            {
+                <text>disabled</text>
+            }>
+                @coin.Value
+                        </button>
+        }
+    </div>
+    <div>
+        @foreach (var coin in Model.Coins)
+        {
+            <p id="coin-quantity-@coin.Value">@coin.Value ₽ - @coin.Quantity pcs.</p>
+            <input type="hidden" id="hidden-coin-queantity-@coin.Value" value="@coin.Value" />
+        }
+    </div>
+</div>
+
+<div class="d-flex gap-5">
+
+    <div id="current-amount" class="mb-5">Current amount: @Model.CurrentAmount</div>
+
+    <div>
+        <button id="return-change-btn" class="btn btn-danger">Get money</button>
+    </div>
+    <input type="hidden" id="hidden-current-amount" value="@Model.CurrentAmount" />
+</div>
+
+
+
+<div class="container">
+    <div class="row d-flex justify-content-between">
+        @foreach (var drink in Model.Drinks)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-2">
+                    <img src="@drink.ImageUrl" class="card-img-top mx-auto" alt="@drink.Name">
+                    <div class="card-body d-flex flex-column justify-content-end">
+                        <h5 class="card-title text-center">@drink.Name</h5>
+                        <p class="card-text text-center">Price: @drink.Price ₽</p>
+                        <p id="current-drink-quantity-@drink.Id" class="card-text text-center">Quantity: @drink.Quantity pcs.</p>
+                        <input type="hidden" id="drink-quantity-@drink.Id" value="@drink.Quantity" />
+                        <button class="btn btn-primary btn-block buy-btn w-75 mx-auto" data-drink-id="@drink.Id" data-drink-price="@drink.Price" @if (drink.Quantity == 0)
+                        {
+                            <text>disabled</text>
+                        }>Buy</button>
+
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
+
+
+
 </div>
+
+
+
+<script>
+    // money
+    document.addEventListener("DOMContentLoaded", function () {
+        var coinButtons = document.querySelectorAll(".coin-button");
+        var currentAmountDisplay = document.getElementById("current-amount");
+        var currentAmountHiddenInput = document.getElementById("hidden-current-amount");
+
+        var currentAmount = parseFloat(currentAmountHiddenInput.value);
+
+        coinButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                var coinValue = parseInt(button.value);
+
+                var formData = new FormData();
+                formData.append("coinValue", coinValue);
+
+                fetch("/Machine/UpdateCoinValue", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Network response was not ok");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            currentAmount += coinValue;
+                            currentAmountDisplay.textContent = "Current amount: " + currentAmount;
+                            currentAmountHiddenInput.value = currentAmount;
+
+                            var coinInfoId = "coin-quantity-" + coinValue;
+
+                            var coinInfoElement = document.getElementById(coinInfoId);
+
+                            var coinInfoText = coinInfoElement.textContent.split(" ");
+                            var currentCoinQuantity = parseInt(coinInfoText[coinInfoText.length - 2]);
+
+                            currentCoinQuantity += 1;
+
+                            coinInfoElement.textContent = coinValue + " ₽ - " + currentCoinQuantity + " pcs.";
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("There was an error!", error);
+                        alert("Error: " + error.message);
+                    });
+            });
+        });
+    });
+
+
+
+
+
+    // buy
+    document.addEventListener("DOMContentLoaded", function () {
+        var buyButtons = document.querySelectorAll(".buy-btn");
+
+        buyButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                var drinkId = button.dataset.drinkId;
+                var drinkPrice = parseFloat(button.dataset.drinkPrice);
+                var currentAmountElement = document.getElementById("current-amount");
+                var currentAmountHiddenInput = document.getElementById("hidden-current-amount");
+                var currentAmount = parseFloat(currentAmountHiddenInput.value);
+
+                var drinkQuantityHiddenInput = document.getElementById("hidden-drink-quantity-" + drinkId);
+
+                if (currentAmount >= drinkPrice) {
+                    fetch("/Machine/BuyDrink", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            drinkId: drinkId,
+                            drinkPrice: drinkPrice,
+                            currentAmount: currentAmount
+                        })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Network response was not ok");
+                            }
+                            return response.text();
+                        })
+                        .then(data => {
+                            currentAmount -= drinkPrice;
+                            currentAmountHiddenInput.value = currentAmount;
+                            currentAmountElement.textContent = "Current amount: " + currentAmount;
+                            alert(data);
+
+                            var boughtDrinkId = drinkId;
+
+                            var drinkQuantityField = document.getElementById("drink-quantity-" + boughtDrinkId);
+                            var drinkQuantityDisplay = document.querySelector(`#current-drink-quantity-${boughtDrinkId}`);
+
+                            var currentDrinkQuantity = parseInt(drinkQuantityField.value);
+                            currentDrinkQuantity--;
+
+                            drinkQuantityField.value = currentDrinkQuantity;
+                            drinkQuantityDisplay.textContent = `Quantity: ${currentDrinkQuantity} pcs.`;
+                        })
+                        .catch(error => {
+                            console.error("There was an error!", error);
+                            alert("Error: " + error.message);
+                        });
+                } else {
+                    alert("Not enough money to buy this drink!");
+                }
+            });
+        });
+    });
+
+    
+    // btn get money
+    document.addEventListener("DOMContentLoaded", function () {
+        var returnChangeBtn = document.getElementById("return-change-btn");
+        var currentAmountDisplay = document.getElementById("current-amount");
+        var currentAmountHiddenInput = document.getElementById("hidden-current-amount");
+
+        returnChangeBtn.addEventListener("click", function () {
+            var currentAmount = parseFloat(currentAmountHiddenInput.value);
+
+            var tenCoins = Math.floor(currentAmount / 10);
+            var fiveCoins = Math.floor((currentAmount % 10) / 5);
+            var twoCoins = Math.floor(((currentAmount % 10) % 5) / 2);
+            var oneCoins = Math.floor(((currentAmount % 10) % 5) % 2);
+
+            fetch("/Machine/ReturnChange", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    tenCoins: tenCoins,
+                    fiveCoins: fiveCoins,
+                    twoCoins: twoCoins,
+                    oneCoins: oneCoins
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        
+                        currentAmountDisplay.textContent = "Current amount: 0";
+                        currentAmountHiddenInput.value = "0";
+
+                        // Обновить информацию о количестве монет на странице
+                        //updateCoinQuantities(data.updatedCoins);
+                        // можно было бы и обновить, но я устал, поэтому просто перезагружаю страницу. 
+                        alert("Refund was successful")
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("There was an error!", error);
+                    alert("Error: " + error.message);
+                });
+        });
+
+        
+
+    });
+
+
+
+
+</script>
