@@ -16,19 +16,20 @@ namespace Intravision_task.Controllers
         }
 
         // GET: /Drinks
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var drinks = _context.Drinks
-                                .Select(d => new DrinkDTO
-                                {
-                                    Id = d.Id,
-                                    Name = d.Name,
-                                    Price = d.Price,
-                                    ImageUrl = d.ImageUrl
-                                })
-                                .ToList();
+            var drinks = await _context.Drinks.Select(d => new DrinkDTO
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Price = d.Price,
+                Quantity = d.Quantity,
+                ImageUrl = d.ImageUrl
+            }).ToListAsync();
+            
             return View(drinks);
         }
+
 
         // GET: /Drinks/Add
         public IActionResult Add()
@@ -46,6 +47,7 @@ namespace Intravision_task.Controllers
                 {
                     Name = drinkDTO.Name,
                     Price = drinkDTO.Price,
+                    Quantity = drinkDTO.Quantity,
                     ImageUrl = drinkDTO.ImageUrl
                 };
 
@@ -77,6 +79,7 @@ namespace Intravision_task.Controllers
                 Id = drink.Id,
                 Name = drink.Name,
                 Price = drink.Price,
+                Quantity = drink.Quantity,
                 ImageUrl = drink.ImageUrl
             };
 
@@ -86,7 +89,7 @@ namespace Intravision_task.Controllers
         // POST: /Drinks/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Price,ImageUrl")] DrinkDTO drinkDTO)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Price,Quantity,ImageUrl")] DrinkDTO drinkDTO)
         {
             if (id != drinkDTO.Id)
             {
@@ -105,6 +108,7 @@ namespace Intravision_task.Controllers
 
                     drink.Name = drinkDTO.Name;
                     drink.Price = drinkDTO.Price;
+                    drink.Quantity = drinkDTO.Quantity;
                     drink.ImageUrl = drinkDTO.ImageUrl;
 
                     _context.Update(drink);

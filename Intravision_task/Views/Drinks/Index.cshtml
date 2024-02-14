@@ -16,20 +16,22 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th></th>
+            <th class ="text-center">Image</th>
+            <th class ="text-center">Name</th>
+            <th class ="text-center">Price</th>
+            <th class ="text-center">Quantity</th>
+            <th class ="text-center"></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var drink in Model)
         {
             <tr>
-                <td><img src="@drink.ImageUrl" alt="Drink image" style="max-width: 100px;" /></td>
-                <td>@drink.Name</td>
-                <td>@drink.Price ₽</td>
-                <td>
+                <td class="text-center"><img src="@drink.ImageUrl" alt="Drink image" style="max-width: 100px;" /></td>
+                <td class="text-center">@drink.Name</td>
+                <td class="text-center">@drink.Price ₽</td>
+                <td class="text-center">@drink.Quantity</td>
+                <td class="text-center">
                     <form id="deleteForm-@drink.Id" action="@Url.Action("Delete", "Drinks", new { id = drink.Id })" method="post" class="d-flex align-items-center gap-1">
                         <a asp-action="Edit" asp-route-id="@drink.Id">Edit</a> |
                         <button type="submit" class="btn btn-link link-danger p-0" onclick="return confirm('Are you sure you want to remove?')">Delete</button>

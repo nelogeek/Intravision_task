@@ -18,15 +18,17 @@ namespace Intravision_task.Controllers
         }
 
         // GET: /Coins
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            List<CoinDTO> coins = _context.Coins.Select(c => new CoinDTO
-            {
-                Id = c.Id,
-                Value = c.Value,
-                Quantity = c.Quantity,
-                IsBlocked = c.IsBlocked ?? false
-            }).ToList();
+            var coins = await _context.Coins
+                .Select(c => new CoinDTO
+                {
+                    Id = c.Id,
+                    Value = c.Value,
+                    Quantity = c.Quantity,
+                    IsBlocked = c.IsBlocked ?? false
+                })
+                .ToListAsync();
 
             return View(coins);
         }
@@ -41,9 +43,17 @@ namespace Intravision_task.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(CoinDTO coinDTO)
         {
+            // Проверяем, существует ли монета с таким же номиналом
+            var existingCoin = await _context.Coins.FirstOrDefaultAsync(c => c.Value == coinDTO.Value);
+
+            if (existingCoin != null)
+            {
+                ModelState.AddModelError("Value", "A coin with this value already exists.");
+                return View(coinDTO);
+            }
+
             if (ModelState.IsValid)
             {
-                // Создание нового экземпляра монеты из DTO
                 var coin = new Coin
                 {
                     Value = coinDTO.Value,
@@ -51,14 +61,13 @@ namespace Intravision_task.Controllers
                     IsBlocked = coinDTO.IsBlocked
                 };
 
-                // Добавление монеты в контекст данных
                 _context.Coins.Add(coin);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index)); // Перенаправляем на страницу со списком монет
+                return RedirectToAction(nameof(Index));
             }
 
-            return View(coinDTO); // Возвращаем обратно на страницу добавления с ошибками валидации, если они есть
+            return View(coinDTO);
         }
 
         // GET: /Coins/Edit/5
@@ -87,6 +96,15 @@ namespace Intravision_task.Controllers
             if (id != coinDTO.Id)
             {
                 return NotFound();
+            }
+
+            // Проверяем, существует ли другая монета с таким же номиналом, исключая текущую монету
+            var existingCoin = await _context.Coins.FirstOrDefaultAsync(c => c.Value == coinDTO.Value && c.Id != id);
+
+            if (existingCoin != null)
+            {
+                ModelState.AddModelError("Value", "A coin with this value already exists.");
+                return View(coinDTO);
             }
 
             if (ModelState.IsValid)
@@ -119,6 +137,7 @@ namespace Intravision_task.Controllers
             }
             return View(coinDTO);
         }
+
 
         // POST: /Coins/Delete/5
         [HttpPost]

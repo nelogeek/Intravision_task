@@ -1,0 +1,27 @@
+﻿@model IEnumerable<Intravision_task.DTO.DrinkDTO>
+
+@{
+    ViewData["Title"] = "Vending machine";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    @foreach (var drink in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="@drink.ImageUrl" class="card-img-top mx-auto" alt="Drink image" style="max-height: 140px; width:auto">
+                <div class="card-body">
+                    <h5 class="card-title">@drink.Name</h5>
+                    <p class="card-text">@drink.Price ₽</p>
+                    <form asp-action="Buy" method="post">
+                        <input type="hidden" name="drinkId" value="@drink.Id" />
+                        <input type="number" name="amount" placeholder="Enter amount" class="form-control mb-2" required />
+                        <button type="submit" class="btn btn-primary">Buy</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

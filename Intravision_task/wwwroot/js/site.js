@@ -1,4 +1,12 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿function validateCoinValue() {
+    var coinValueInput = document.getElementById('Value');
+    var coinValue = parseInt(coinValueInput.value);
+    var validationMessageSpan = document.getElementById('coinValueValidationMessage');
 
-// Write your JavaScript code.
+    if (![1, 2, 5, 10].includes(coinValue)) {
+        validationMessageSpan.textContent = 'Coin value must be 1, 2, 5, or 10';
+        coinValueInput.value = '';
+    } else {
+        validationMessageSpan.textContent = '';
+    }
+}

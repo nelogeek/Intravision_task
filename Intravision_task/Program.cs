@@ -1,4 +1,5 @@
 using Intravision_task.Data;
+using Intravision_task.Filters;
 using Intravision_task.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,9 @@ namespace Intravision_task
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Add secretKeyFilter
+            builder.Services.AddScoped<SecretKeyFilter>();
 
             var app = builder.Build();
 
@@ -37,6 +41,7 @@ namespace Intravision_task
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
             app.Run();
         }

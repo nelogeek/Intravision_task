@@ -8,6 +8,7 @@ namespace Intravision_task.DTO
         public int Id { get; set; }
         public string? Name { get; set; }
         public decimal? Price { get; set; }
+        public int? Quantity { get; set; }
         public string? ImageUrl { get; set; }
 
         public DrinkDTO(Drink drink)
@@ -16,6 +17,7 @@ namespace Intravision_task.DTO
             this.Name = drink.Name;
             this.Price = drink.Price;
             this.ImageUrl = drink.ImageUrl;
+            this.Quantity = drink.Quantity;
         }
 
         public DrinkDTO()

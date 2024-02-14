@@ -14,7 +14,8 @@
         </div>
         <div class="form-group">
             <label asp-for="Value" class="control-label"></label>
-            <input asp-for="Value" class="form-control" />
+            <input asp-for="Value" class="form-control" id="Value" oninput="validateCoinValue()" />
+            <span asp-validation-for="Value" class="text-danger" id="coinValueValidationMessage"></span>
         </div>
         <div class="form-group">
             <label asp-for="Quantity" class="control-label"></label>
@@ -28,4 +29,3 @@
     <a class="btn btn-outline-secondary" asp-action="Index" asp-controller="Coins">Back to list</a>
     <button type="submit" class="btn btn-primary">Save</button>
 </form>
-

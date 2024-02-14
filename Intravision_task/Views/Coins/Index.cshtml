@@ -4,27 +4,34 @@
     ViewData["Title"] = "Coins";
 }
 
+<style>
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
+</style>
+
 <h1>@ViewData["Title"]</h1>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Id</th>
-            <th>Value</th>
-            <th>Quantity</th>
-            <th>Blocked</th>
-            <th></th>
+            <th class="text-center">Id</th>
+            <th class="text-center">Value</th>
+            <th class="text-center">Quantity</th>
+            <th class="text-center">Blocked</th>
+            <th class="text-center"></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var coin in Model)
         {
             <tr>
-                <td>@coin.Id</td>
-                <td>@coin.Value</td>
-                <td>@coin.Quantity</td>
-                <td>@coin.IsBlocked</td>
-                <td>
+                <td class="text-center">@coin.Id</td>
+                <td class="text-center">@coin.Value</td>
+                <td class="text-center">@coin.Quantity</td>
+                <td class="text-center">@coin.IsBlocked</td>
+                <td class="text-center">
                     
                     <form id="deleteForm-@coin.Id" action="@Url.Action("Delete", "Coins", new { id = coin.Id })" method="post" class="d-flex align-items-center gap-1">
                         <a asp-action="Edit" asp-route-id="@coin.Id">Edit</a>  |

@@ -10,3 +10,29 @@
         <a asp-controller="Drinks" asp-action="Index" class="btn btn-primary">Edit drinks</a>
     </div>
 </div>
+
+<script>
+    window.onload = function () {
+        var secretKey = prompt("Enter the password to access the admin panel:")
+
+        $.ajax({
+            url: "/Admin/CheckPassword",
+            method: "POST",
+            data: { secretKey: secretKey },
+            success: function (response) {
+                if (response.success) {
+                    
+                    window.close();
+                } else {
+                    
+                    alert("Invalid password. Access denied.");
+                    window.location.href = "/";
+                }
+            },
+            error: function () {
+                alert("An error occurred while verifying the password. Try again later.");
+            }
+        });
+    };
+
+</script>
