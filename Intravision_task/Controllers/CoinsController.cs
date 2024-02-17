@@ -5,31 +5,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
+using Intravision_task.Interfaces;
 
 namespace Intravision_task.Controllers
 {
+
+    //TODO протестировать методы
     public class CoinsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICoinService _coinService;
 
-        public CoinsController(ApplicationDbContext context)
+        public CoinsController(ApplicationDbContext context, ICoinService coinService)
         {
             _context = context;
+            _coinService = coinService;
         }
 
         // GET: /Coins
         public async Task<IActionResult> Index()
         {
-            var coins = await _context.Coins
-                .Select(c => new CoinDTO
-                {
-                    Id = c.Id,
-                    Value = c.Value,
-                    Quantity = c.Quantity,
-                    IsBlocked = c.IsBlocked ?? false
-                })
-                .ToListAsync();
-
+            var coins = await _coinService.GetAllCoinsAsync();
             return View(coins);
         }
 
@@ -43,47 +39,44 @@ namespace Intravision_task.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(CoinDTO coinDTO)
         {
-            var existingCoin = await _context.Coins.FirstOrDefaultAsync(c => c.Value == coinDTO.Value);
-
-            if (existingCoin != null)
-            {
-                ModelState.AddModelError("Value", "A coin with this value already exists.");
-                return View(coinDTO);
-            }
-
             if (ModelState.IsValid)
             {
-                var coin = new Coin
+                if (coinDTO.Value.HasValue)
                 {
-                    Value = coinDTO.Value,
-                    Quantity = coinDTO.Quantity,
-                    IsBlocked = coinDTO.IsBlocked
-                };
+                    var existingCoin = await _coinService.GetCoinByValueAsync(coinDTO.Value.Value);
+                    if (existingCoin != null)
+                    {
+                        ModelState.AddModelError("Value", "A coin with this value already exists.");
+                        return View(coinDTO);
+                    }
 
-                _context.Coins.Add(coin);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
+                    await _coinService.AddCoinAsync(coinDTO);
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("Value", "Value field is required.");
+                    return View(coinDTO);
+                }
             }
 
             return View(coinDTO);
         }
 
+
         // GET: /Coins/Edit/5
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var coin = _context.Coins.Find(id);
-            if (coin == null)
+            var coinDTO = await _coinService.GetCoinByIdAsync(id.Value);
+            if (coinDTO == null)
             {
                 return NotFound();
             }
-
-            var coinDTO = new CoinDTO(coin);
 
             return View(coinDTO);
         }
@@ -97,32 +90,16 @@ namespace Intravision_task.Controllers
                 return NotFound();
             }
 
-            var existingCoin = await _context.Coins.FirstOrDefaultAsync(c => c.Value == coinDTO.Value && c.Id != id);
-
-            if (existingCoin != null)
-            {
-                ModelState.AddModelError("Value", "A coin with this value already exists.");
-                return View(coinDTO);
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var coin = new Coin
-                    {
-                        Id = coinDTO.Id,
-                        Value = coinDTO.Value,
-                        Quantity = coinDTO.Quantity,
-                        IsBlocked = coinDTO.IsBlocked
-                    };
-
-                    _context.Update(coin);
-                    await _context.SaveChangesAsync();
+                    await _coinService.UpdateCoinAsync(id, coinDTO);
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CoinExists(coinDTO.Id))
+                    if (!await _coinService.CoinExistsAsync(id))
                     {
                         return NotFound();
                     }
@@ -131,8 +108,8 @@ namespace Intravision_task.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
+
             return View(coinDTO);
         }
 
@@ -141,22 +118,8 @@ namespace Intravision_task.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var coin = await _context.Coins.FindAsync(id);
-            if (coin == null)
-            {
-                return NotFound();
-            }
-
-            _context.Coins.Remove(coin);
-            await _context.SaveChangesAsync();
-
+            await _coinService.DeleteCoinAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-
-        private bool CoinExists(int id)
-        {
-            return _context.Coins.Any(e => e.Id == id);
         }
     }
 }

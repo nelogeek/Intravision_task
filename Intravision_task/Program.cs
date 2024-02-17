@@ -1,6 +1,8 @@
 using Intravision_task.Data;
 using Intravision_task.Filters;
+using Intravision_task.Interfaces;
 using Intravision_task.Models;
+using Intravision_task.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Intravision_task
@@ -17,6 +19,9 @@ namespace Intravision_task
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddScoped<IDrinkService, DrinkService>();
+            builder.Services.AddScoped<ICoinService, CoinService>();
 
             // Add secretKeyFilter
             builder.Services.AddScoped<SecretKeyFilter>();

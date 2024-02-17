@@ -1,5 +1,6 @@
 ﻿using Intravision_task.Data;
 using Intravision_task.DTO;
+using Intravision_task.Interfaces;
 using Intravision_task.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,27 +11,20 @@ namespace Intravision_task.Controllers
     public class DrinksController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IDrinkService _drinkService;
 
-        public DrinksController(ApplicationDbContext context)
+        public DrinksController(ApplicationDbContext context, IDrinkService drinkService)
         {
             _context = context;
+            _drinkService = drinkService;
         }
 
         // GET: /Drinks
         public async Task<IActionResult> Index()
         {
-            var drinks = await _context.Drinks.Select(d => new DrinkDTO
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Price = d.Price,
-                Quantity = d.Quantity,
-                ImageUrl = d.ImageUrl
-            }).ToListAsync();
-            
+            IEnumerable<DrinkDTO> drinks = await _drinkService.GetAllDrinksAsync();
             return View(drinks);
         }
-
 
         // GET: /Drinks/Add
         public IActionResult Add()
@@ -44,17 +38,7 @@ namespace Intravision_task.Controllers
         {
             if (ModelState.IsValid)
             {
-                var drink = new Drink
-                {
-                    Name = drinkDTO.Name,
-                    Price = drinkDTO.Price,
-                    Quantity = drinkDTO.Quantity,
-                    ImageUrl = drinkDTO.ImageUrl
-                };
-
-                _context.Drinks.Add(drink);
-                await _context.SaveChangesAsync();
-
+                await _drinkService.AddDrinkAsync(drinkDTO);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -69,20 +53,11 @@ namespace Intravision_task.Controllers
                 return NotFound();
             }
 
-            var drink = await _context.Drinks.FindAsync(id);
-            if (drink == null)
+            var drinkDTO = await _drinkService.GetDrinkByIdAsync(id.Value);
+            if (drinkDTO == null)
             {
                 return NotFound();
             }
-
-            var drinkDTO = new DrinkDTO
-            {
-                Id = drink.Id,
-                Name = drink.Name,
-                Price = drink.Price,
-                Quantity = drink.Quantity,
-                ImageUrl = drink.ImageUrl
-            };
 
             return View(drinkDTO);
         }
@@ -101,49 +76,27 @@ namespace Intravision_task.Controllers
             {
                 try
                 {
-                    var drink = await _context.Drinks.FindAsync(id);
-                    if (drink == null)
-                    {
-                        return NotFound();
-                    }
-
-                    drink.Name = drinkDTO.Name;
-                    drink.Price = drinkDTO.Price;
-                    drink.Quantity = drinkDTO.Quantity;
-                    drink.ImageUrl = drinkDTO.ImageUrl;
-
-                    _context.Update(drink);
-                    await _context.SaveChangesAsync();
+                    await _drinkService.UpdateDrinkAsync(id, drinkDTO);
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception)
                 {
-                    if (!DrinkExists(drinkDTO.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", "Error updating drink.");
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
+
             }
+
             return View(drinkDTO);
         }
+
+
 
         // POST: /Drinks/Delete/5
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var drink = await _context.Drinks.FindAsync(id);
-            if (drink == null)
-            {
-                return NotFound();
-            }
-
-            _context.Drinks.Remove(drink);
-            await _context.SaveChangesAsync();
-
+            await _drinkService.DeleteDrinkAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
@@ -167,18 +120,8 @@ namespace Intravision_task.Controllers
 
                     foreach (var drink in drinks)
                     {
-                        var newDrink = new Drink
-                        {
-                            Name = drink.Name,
-                            Price = drink.Price,
-                            Quantity = drink.Quantity,
-                            ImageUrl = drink.ImageUrl
-                        };
-
-                        _context.Drinks.Add(newDrink);
+                        await _drinkService.AddDrinkAsync(drink);
                     }
-
-                    await _context.SaveChangesAsync();
 
                     return Ok(new { message = "Drinks imported successfully." });
                 }
