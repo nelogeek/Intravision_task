@@ -4,29 +4,6 @@
     ViewData["Title"] = "Vending machine";
 }
 
-<style>
-    .coin-button {
-        border-radius: 50%;
-        width: 90px;
-        height: 90px;
-        margin: 5px;
-        background-color: #efc946;
-        transition: all 0.3s ease-in;
-    }
-
-        .coin-button:hover:not([disabled]) {
-            background-color: #fbe187;
-        }
-
-        .coin-button[disabled] {
-            cursor: not-allowed;
-        }
-
-    img {
-        max-width: 230px;
-    }
-</style>
-
 
 <h1>@ViewData["Title"]</h1>
 
@@ -40,7 +17,7 @@
                 <text>disabled</text>
             }>
                 @coin.Value
-                        </button>
+                                    </button>
         }
     </div>
     <div>
@@ -55,11 +32,11 @@
 <div class="d-flex gap-5">
 
     <div id="current-amount" class="mb-5">Current amount: @Model.CurrentAmount</div>
-
+    <input type="hidden" id="hidden-current-amount" value="@Model.CurrentAmount" />
     <div>
         <button id="return-change-btn" class="btn btn-danger">Get money</button>
     </div>
-    <input type="hidden" id="hidden-current-amount" value="@Model.CurrentAmount" />
+
 </div>
 
 
@@ -86,190 +63,5 @@
             </div>
         }
     </div>
-
-
-
 </div>
 
-
-
-<script>
-    // money
-    document.addEventListener("DOMContentLoaded", function () {
-        var coinButtons = document.querySelectorAll(".coin-button");
-        var currentAmountDisplay = document.getElementById("current-amount");
-        var currentAmountHiddenInput = document.getElementById("hidden-current-amount");
-
-        var currentAmount = parseFloat(currentAmountHiddenInput.value);
-
-        coinButtons.forEach(function (button) {
-            button.addEventListener("click", function () {
-                var coinValue = parseInt(button.value);
-
-                var formData = new FormData();
-                formData.append("coinValue", coinValue);
-
-                fetch("/Machine/UpdateCoinValue", {
-                    method: "POST",
-                    body: formData
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("Network response was not ok");
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            currentAmount += coinValue;
-                            currentAmountDisplay.textContent = "Current amount: " + currentAmount;
-                            currentAmountHiddenInput.value = currentAmount;
-
-                            var coinInfoId = "coin-quantity-" + coinValue;
-
-                            var coinInfoElement = document.getElementById(coinInfoId);
-
-                            var coinInfoText = coinInfoElement.textContent.split(" ");
-                            var currentCoinQuantity = parseInt(coinInfoText[coinInfoText.length - 2]);
-
-                            currentCoinQuantity += 1;
-
-                            coinInfoElement.textContent = coinValue + " ₽ - " + currentCoinQuantity + " pcs.";
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("There was an error!", error);
-                        alert("Error: " + error.message);
-                    });
-            });
-        });
-    });
-
-
-
-
-
-    // buy
-    document.addEventListener("DOMContentLoaded", function () {
-        var buyButtons = document.querySelectorAll(".buy-btn");
-
-        buyButtons.forEach(function (button) {
-            button.addEventListener("click", function () {
-                var drinkId = button.dataset.drinkId;
-                var drinkPrice = parseFloat(button.dataset.drinkPrice);
-                var currentAmountElement = document.getElementById("current-amount");
-                var currentAmountHiddenInput = document.getElementById("hidden-current-amount");
-                var currentAmount = parseFloat(currentAmountHiddenInput.value);
-
-                var drinkQuantityHiddenInput = document.getElementById("hidden-drink-quantity-" + drinkId);
-
-                if (currentAmount >= drinkPrice) {
-                    fetch("/Machine/BuyDrink", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            drinkId: drinkId,
-                            drinkPrice: drinkPrice,
-                            currentAmount: currentAmount
-                        })
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error("Network response was not ok");
-                            }
-                            return response.text();
-                        })
-                        .then(data => {
-                            currentAmount -= drinkPrice;
-                            currentAmountHiddenInput.value = currentAmount;
-                            currentAmountElement.textContent = "Current amount: " + currentAmount;
-                            alert(data);
-
-                            var boughtDrinkId = drinkId;
-
-                            var drinkQuantityField = document.getElementById("drink-quantity-" + boughtDrinkId);
-                            var drinkQuantityDisplay = document.querySelector(`#current-drink-quantity-${boughtDrinkId}`);
-
-                            var currentDrinkQuantity = parseInt(drinkQuantityField.value);
-                            currentDrinkQuantity--;
-
-                            drinkQuantityField.value = currentDrinkQuantity;
-                            drinkQuantityDisplay.textContent = `Quantity: ${currentDrinkQuantity} pcs.`;
-                        })
-                        .catch(error => {
-                            console.error("There was an error!", error);
-                            alert("Error: " + error.message);
-                        });
-                } else {
-                    alert("Not enough money to buy this drink!");
-                }
-            });
-        });
-    });
-
-    
-    // btn get money
-    document.addEventListener("DOMContentLoaded", function () {
-        var returnChangeBtn = document.getElementById("return-change-btn");
-        var currentAmountDisplay = document.getElementById("current-amount");
-        var currentAmountHiddenInput = document.getElementById("hidden-current-amount");
-
-        returnChangeBtn.addEventListener("click", function () {
-            var currentAmount = parseFloat(currentAmountHiddenInput.value);
-
-            var tenCoins = Math.floor(currentAmount / 10);
-            var fiveCoins = Math.floor((currentAmount % 10) / 5);
-            var twoCoins = Math.floor(((currentAmount % 10) % 5) / 2);
-            var oneCoins = Math.floor(((currentAmount % 10) % 5) % 2);
-
-            fetch("/Machine/ReturnChange", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    tenCoins: tenCoins,
-                    fiveCoins: fiveCoins,
-                    twoCoins: twoCoins,
-                    oneCoins: oneCoins
-                })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        
-                        currentAmountDisplay.textContent = "Current amount: 0";
-                        currentAmountHiddenInput.value = "0";
-
-                        // Обновить информацию о количестве монет на странице
-                        //updateCoinQuantities(data.updatedCoins);
-                        // можно было бы и обновить, но я устал, поэтому просто перезагружаю страницу. 
-                        alert("Refund was successful")
-                        location.reload();
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error("There was an error!", error);
-                    alert("Error: " + error.message);
-                });
-        });
-
-        
-
-    });
-
-
-
-
-</script>

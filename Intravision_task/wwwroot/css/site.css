@@ -25,3 +25,36 @@ body {
     
     text-decoration: underline;
 }
+
+
+
+/* Machine/Index */
+.coin-button {
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    margin: 5px;
+    background-color: #efc946;
+    transition: all 0.3s ease-in;
+
+}
+
+.coin-button:hover:not([disabled]) {
+    background-color: #fbe187;
+}
+
+.coin-button[disabled] {
+    cursor: not-allowed;
+}
+
+img {
+    max-width: 230px;
+}
+
+
+/* /Coins/Index */
+.table td,
+.table th {
+    vertical-align: middle;
+}
+

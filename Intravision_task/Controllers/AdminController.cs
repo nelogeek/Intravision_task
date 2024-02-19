@@ -1,8 +1,10 @@
 ﻿using Intravision_task.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Intravision_task.Controllers
 {
+    
     public class AdminController : Controller
     {
         private readonly IConfiguration _configuration;
@@ -12,7 +14,7 @@ namespace Intravision_task.Controllers
             _configuration = configuration;
         }
 
-        //[ServiceFilter(typeof(SecretKeyFilter))]
+        [ServiceFilter(typeof(SecretKeyFilter))]
         public IActionResult Index()
         {
             return View();

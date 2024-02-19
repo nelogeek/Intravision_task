@@ -25,6 +25,17 @@ namespace Intravision_task.Migrations
                     table.PrimaryKey("PK_Coins", x => x.Id);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Coins",
+                columns: new[] { "Value", "Quantity", "IsBlocked" },
+                values: new object[,]
+                {
+                    { 1, 10, false },
+                    { 2, 10, false },
+                    { 5, 10, false },
+                    { 10, 10, false },
+                });
+
             migrationBuilder.CreateTable(
                 name: "Drinks",
                 columns: table => new

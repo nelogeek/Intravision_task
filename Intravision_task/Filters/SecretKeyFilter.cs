@@ -16,17 +16,17 @@ namespace Intravision_task.Filters
         public void OnActionExecuting(ActionExecutingContext context)
         {
             var secretKey = context.HttpContext.Request.Query["secretKey"].ToString();
-            var adminSecretKey = _configuration["AdminSecretKey"]; 
+            var adminSecretKey = _configuration["AdminSecretKey"];
 
             if (secretKey != adminSecretKey)
             {
-                context.Result = new RedirectToActionResult("Index", "Home", null);
+                context.Result = new ForbidResult(); // Устанавливаем результат запрета доступа
             }
         }
+
         public void OnActionExecuted(ActionExecutedContext context)
         {
-
+            // Можно добавить дополнительную логику после выполнения действия, если необходимо
         }
     }
 }
-

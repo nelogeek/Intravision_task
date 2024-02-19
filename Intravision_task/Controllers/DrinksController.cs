@@ -1,5 +1,6 @@
 ﻿using Intravision_task.Data;
 using Intravision_task.DTO;
+using Intravision_task.Filters;
 using Intravision_task.Interfaces;
 using Intravision_task.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,7 @@ namespace Intravision_task.Controllers
         }
 
         // GET: /Drinks
+        [ServiceFilter(typeof(SecretKeyFilter))]
         public async Task<IActionResult> Index()
         {
             IEnumerable<DrinkDTO> drinks = await _drinkService.GetAllDrinksAsync();

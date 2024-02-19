@@ -22,6 +22,7 @@ namespace Intravision_task
 
             builder.Services.AddScoped<IDrinkService, DrinkService>();
             builder.Services.AddScoped<ICoinService, CoinService>();
+            builder.Services.AddScoped<IMachineService, MachineService>();
 
             // Add secretKeyFilter
             builder.Services.AddScoped<SecretKeyFilter>();

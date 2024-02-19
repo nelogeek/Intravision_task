@@ -4,12 +4,7 @@
     ViewData["Title"] = "Drinks";
 }
 
-<style>
-    .table td,
-    .table th {
-        vertical-align: middle;
-    }
-</style>
+
 
 <h1>@ViewData["Title"]</h1>
 
@@ -46,30 +41,3 @@
 <a class="btn btn-outline-success" asp-action="Add">Add new drink</a>
 <input type="file" id="jsonFileInput" style="display: none;" accept=".json">
 <button class="btn btn-outline-primary" onclick="document.getElementById('jsonFileInput').click();">Import Drinks</button>
-
-<script>
-    document.getElementById('jsonFileInput').addEventListener('change', function () {
-        var file = this.files[0];
-        var formData = new FormData();
-        formData.append('file', file);
-
-        fetch("/Drinks/ImportDrinks", {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => {
-                if (!response.ok) {
-                    alert('Failed to upload JSON file.');
-                    throw new Error('Import failed');
-                }
-                alert('JSON file uploaded successfully.'); 
-                location.reload(); 
-            })
-            .catch(error => {
-                console.error(error); 
-            });
-    });
-
-
-
-</script>   
