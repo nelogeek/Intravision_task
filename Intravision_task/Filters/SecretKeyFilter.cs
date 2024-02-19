@@ -20,13 +20,13 @@ namespace Intravision_task.Filters
 
             if (secretKey != adminSecretKey)
             {
-                context.Result = new ForbidResult(); // Устанавливаем результат запрета доступа
+                context.Result = new ForbidResult(); // Запрет доступа
             }
         }
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            // Можно добавить дополнительную логику после выполнения действия, если необходимо
+            
         }
     }
 }

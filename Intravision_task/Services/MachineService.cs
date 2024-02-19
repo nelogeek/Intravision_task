@@ -121,8 +121,6 @@ namespace Intravision_task.Services
                     int oneCoins = Math.Min(changeAmount, oneCoinsCount);
 
 
-
-                    // Проверяем, достаточно ли монет для сдачи
                     if (amount == tenCoins * 10 + fiveCoins * 5 + twoCoins * 2 + oneCoins)
                     {
                         currentAmount -= drinkPrice;

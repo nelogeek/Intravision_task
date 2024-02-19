@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Обработчик для добавления монет
             coinButtons.forEach(function (button) {
                 button.addEventListener("click", function () {
-                    addCoin(parseFloat(button.textContent)); // Используем parseFloat для преобразования текста кнопки в число
+                    addCoin(parseFloat(button.textContent)); 
                 });
             });
 
@@ -95,16 +95,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             function returnChange() {
-    // Отправляем запрос на сервер, чтобы получить текущее количество монет в автомате
     fetch("/Machine/GetCoinQuantities")
         .then(response => response.json())
         .then(function (data) {
             if (data.success) {
-                // Извлекаем данные о количестве монет из ответа
+
                 var coinQuantities = data.coinQuantities;
                 var currentAmount = parseFloat(currentAmountHiddenInput.value);
                 var curAm = currentAmount;
-                // Вычисляем количество монет для сдачи
+
                 var tenCoins = Math.min(Math.floor(currentAmount / 10), coinQuantities.tenCoins);
                 currentAmount -= tenCoins * 10;
                 var fiveCoins = Math.min(Math.floor(currentAmount / 5), coinQuantities.fiveCoins);
@@ -115,7 +114,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Проверяем, хватает ли монет для сдачи
                 if (curAm == tenCoins * 10 + fiveCoins * 5 + twoCoins * 2 + oneCoins) {
-                    // Отправляем запрос на сервер для выдачи сдачи с учетом полученных данных
                     fetch("/Machine/ReturnChange", {
                         method: "POST",
                         headers: {
@@ -138,11 +136,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         })
                         .catch(handleError);
                 } else {
-                    // Выводим сообщение о том, что не хватает монет для сдачи
                     alert("Not enough coins for change.");
                 }
             } else {
-                // Обработка случая, когда запрос на получение данных о количестве монет не удался
                 alert("Failed to get coin quantities.");
             }
         })
