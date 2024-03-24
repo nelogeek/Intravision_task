@@ -1,14 +1,15 @@
 ﻿using Intravision_task.Data;
 using Intravision_task.DTO;
-using Intravision_task.Filters;
 using Intravision_task.Interfaces;
 using Intravision_task.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace Intravision_task.Controllers
 {
+    [Authorize]
     public class DrinksController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -21,7 +22,6 @@ namespace Intravision_task.Controllers
         }
 
         // GET: /Drinks
-        [ServiceFilter(typeof(SecretKeyFilter))]
         public async Task<IActionResult> Index()
         {
             IEnumerable<DrinkDTO> drinks = await _drinkService.GetAllDrinksAsync();

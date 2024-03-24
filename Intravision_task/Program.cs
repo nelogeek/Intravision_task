@@ -1,9 +1,10 @@
 using Intravision_task.Data;
-using Intravision_task.Filters;
 using Intravision_task.Interfaces;
 using Intravision_task.Models;
 using Intravision_task.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Intravision_task
 {
@@ -17,15 +18,44 @@ namespace Intravision_task
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            // Add services to the container.
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {
+
+                // Disabling mail confirmation
+                options.SignIn.RequireConfirmedEmail = false;
+
+                // Do not require email uniqueness
+                options.User.RequireUniqueEmail = false;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
+            // Password settings
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // Disabling password length verification
+                options.Password.RequiredLength = 0;
+                options.Password.RequiredUniqueChars = 0;
+
+                // Disabling checking for non-alphanumeric characters
+                options.Password.RequireNonAlphanumeric = false;
+
+                // Disabling checking for lowercase letters
+                options.Password.RequireLowercase = false;
+
+                // Disabling checking for uppercase letters
+                options.Password.RequireUppercase = false;
+
+            });
+
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddScoped<IDrinkService, DrinkService>();
             builder.Services.AddScoped<ICoinService, CoinService>();
             builder.Services.AddScoped<IMachineService, MachineService>();
 
-            // Add secretKeyFilter
-            builder.Services.AddScoped<SecretKeyFilter>();
 
             var app = builder.Build();
 
@@ -33,7 +63,6 @@ namespace Intravision_task
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -42,6 +71,7 @@ namespace Intravision_task
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

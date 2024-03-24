@@ -21,6 +21,7 @@
         }
     </div>
     <div>
+        <h4>Number of coins</h4>
         @foreach (var coin in Model.Coins)
         {
             <p id="coin-quantity-@coin.Value">@coin.Value ₽ - @coin.Quantity pcs.</p>

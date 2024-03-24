@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
 using Intravision_task.Interfaces;
-using Intravision_task.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Intravision_task.Controllers
 {
-
+    [Authorize]
     public class CoinsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,7 +23,6 @@ namespace Intravision_task.Controllers
         }
 
         // GET: /Coins
-        [ServiceFilter(typeof(SecretKeyFilter))]
         public async Task<IActionResult> Index()
         {
             var coins = await _coinService.GetAllCoinsAsync();

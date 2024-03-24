@@ -1,4 +1,5 @@
 using Intravision_task.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -17,7 +18,7 @@ namespace Intravision_task.Controllers
         {
             return View();
         }
-        
+
         public IActionResult Readme()
         {
             return View();
